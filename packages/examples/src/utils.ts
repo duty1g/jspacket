@@ -8,7 +8,7 @@ const targetRegex = /(?:(?:([^/@:]*)\/)?(([^@:]+))(?::([^@]*))?@)?(.*)/;
 const credentialRegex = /(?:(?:([^/:]*)\/)?([^:]*)(?::(.*))?)?/;
 
 export const VERSION = '0.1.0';
-const C = '\x1b[38;2;0;211;209m';
+const C = '\x1b[38;2;1;114;109m';
 const X = '\x1b[0m';
 const ASCII_ART = String.raw`
      ____.      __________                __           __
