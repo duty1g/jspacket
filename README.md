@@ -1,4 +1,4 @@
-# JsPacket
+# jspacket
 
 ![Stars](https://img.shields.io/github/stars/duty1g/jspacket)
 ![npm Version](https://img.shields.io/npm/v/jspacket)
@@ -23,7 +23,7 @@
 
 #
 
-JsPacket is a lightweight, fast, and fully portable reimplementation of [Impacket](https://github.com/fortra/impacket) in TypeScript and JavaScript. No Python runtime, no native extensions — just `npm install` and go, or compile to a standalone binary. Ships as self-contained JavaScript bundles that run anywhere Node.js runs: Linux, macOS, Windows, WSL, Docker, and CI pipelines. Same tools, same flags, same output — if you know Impacket, you already know jspacket.
+jspacket is a lightweight, fast, and fully portable reimplementation of [Impacket](https://github.com/fortra/impacket) in TypeScript and JavaScript. No Python runtime, no native extensions — just `npm install` and go, or compile to a standalone binary. Ships as self-contained JavaScript bundles that run anywhere Node.js runs: Linux, macOS, Windows, WSL, Docker, and CI pipelines. Same tools, same flags, same output — if you know Impacket, you already know jspacket.
 
 Built as a monorepo with 44 packages mirroring Impacket's module structure: SMB, DCE/RPC, Kerberos, LDAP, NTLM, DPAPI, WMI/DCOM, MSSQL, and more.
 
@@ -61,7 +61,7 @@ npx jspacket-secretsdump domain/user@target
 **Requirements:** Node.js 18+ (LTS recommended). No Python, no build tools, no native modules.
 
 
-## Running JsPacket
+## Running jspacket
 
 ```console
 $ jspacket-lookupsid 'CORP/pentest@dc01.corp.local' -hashes :aabbccddee1122334455667788990011
