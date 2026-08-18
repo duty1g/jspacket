@@ -20,7 +20,7 @@ const ASCII_ART = String.raw`
 \________/____  >|____|    (____  /\___  >__|_ \\___  >__|
               \/                \/     \/     \/    \/`;
 export const BANNER = `${R}${ASCII_ART}
-  v${VERSION}${D}{#dev}${Y}@duty1g${X}`;
+  \x1b[32mv${VERSION}${D}{#dev}${Y}@duty1g${X}`;
 
 export const EMPTY_LM_HASH = 'AAD3B435B51404EEAAD3B435B51404EE';
 
