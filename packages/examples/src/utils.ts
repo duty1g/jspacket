@@ -8,7 +8,15 @@ const targetRegex = /(?:(?:([^/@:]*)\/)?(([^@:]+))(?::([^@]*))?@)?(.*)/;
 const credentialRegex = /(?:(?:([^/:]*)\/)?([^:]*)(?::(.*))?)?/;
 
 export const VERSION = '0.1.0';
-export const BANNER = `jspacket v${VERSION} - by duty1g (https://github.com/duty1g/jspacket)`;
+const ASCII_ART = String.raw`
+     ____.      __________                __           __
+    |    | _____\______   \_____    ____ |  | __ _____/  |_
+    |    |/  ___/|     ___/\__  \ _/ ___\|  |/ // __ \   __\
+/\__|    |\___ \ |    |     / __ \\  \___|    <\  ___/|  |
+\________/____  >|____|    (____  /\___  >__|_ \\___  >__|
+              \/                \/     \/     \/    \/`;
+export const BANNER = `${ASCII_ART}
+  v${VERSION} - by duty1g (https://github.com/duty1g/jspacket)`;
 
 export const EMPTY_LM_HASH = 'AAD3B435B51404EEAAD3B435B51404EE';
 
