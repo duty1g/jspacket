@@ -8,15 +8,19 @@ const targetRegex = /(?:(?:([^/@:]*)\/)?(([^@:]+))(?::([^@]*))?@)?(.*)/;
 const credentialRegex = /(?:(?:([^/:]*)\/)?([^:]*)(?::(.*))?)?/;
 
 export const VERSION = '0.1.0';
-const ASCII_ART = String.raw`
-     ____.      __________                __           __
-    |    | _____\______   \_____    ____ |  | __ _____/  |_
-    |    |/  ___/|     ___/\__  \ _/ ___\|  |/ // __ \   __\
-/\__|    |\___ \ |    |     / __ \\  \___|    <\  ___/|  |
-\________/____  >|____|    (____  /\___  >__|_ \\___  >__|
-              \/                \/     \/     \/    \/`;
-export const BANNER = `${ASCII_ART}
-  v${VERSION} - by duty1g (https://github.com/duty1g/jspacket)`;
+const R = '\x1b[31m';
+const B = '\x1b[34m';
+const W = '\x1b[97m';
+const D = '\x1b[90m';
+const X = '\x1b[0m';
+export const BANNER = `
+${R}     ____.      __________                __           __
+${R}    |    | _____${W}\\______   \\${R}_____    ____ |  | __ _____/  |_
+${R}    |    |/  ___/${W}|     ___/${R}\\__  \\ _/ ___\\|  |/ // __ \\   __\\
+${R}/\\__|    |${W}\\___ \\ |    |   ${R}  / __ \\\\  \\___|    <\\  ___/|  |
+${R}\\________/${W}____  >|____|   ${R} (____  /\\___  >__|_ \\\\___  >__|
+${W}              \\/           ${R}     \\/     \\/     \\/    \\/
+${B}  v${VERSION}${D} - by duty1g (https://github.com/duty1g/jspacket)${X}`;
 
 export const EMPTY_LM_HASH = 'AAD3B435B51404EEAAD3B435B51404EE';
 
