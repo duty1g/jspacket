@@ -381,4 +381,4 @@ Side-by-side comparison with Impacket is the fastest way to triage — it tells 
 
 Modified Apache License, inherited from Impacket. See [LICENSE](./LICENSE).
 
-Made with by [@duty1g](https://github.com/duty1g)
+Made with 🖤 by [@duty1g](https://github.com/duty1g)
