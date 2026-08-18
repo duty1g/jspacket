@@ -72,7 +72,7 @@ $ jspacket-lookupsid 'CORP/pentest@dc01.corp.local' -hashes :aabbccddee112233445
 /\__|    |\___ \ |    |     / __ \\  \___|    <\  ___/|  |
 \________/____  >|____|    (____  /\___  >__|_ \\___  >__|
               \/                \/     \/     \/    \/
-                                                v0.1.0{#dev}@duty1g
+                                v0.1.0{#dev}@duty1g
 
 [*] Brute forcing SIDs at dc01.corp.local
 [*] StringBinding ncacn_np:dc01.corp.local[\pipe\lsarpc]
