@@ -25,9 +25,9 @@
 
 JsPacket is a lightweight, fast, and fully portable reimplementation of [Impacket](https://github.com/fortra/impacket) in TypeScript and JavaScript. No Python runtime, no native extensions — just `npm install` and go, or compile to a standalone binary. Ships as self-contained JavaScript bundles that run anywhere Node.js runs: Linux, macOS, Windows, WSL, Docker, and CI pipelines. Same tools, same flags, same output — if you know Impacket, you already know jspacket.
 
-> **Beta Release** — under active development. If something isn't working, test the same operation with Impacket side-by-side and include both outputs in your [bug report](https://github.com/duty1g/jspacket/issues/new).
-
 Built as a monorepo with 44 packages mirroring Impacket's module structure: SMB, DCE/RPC, Kerberos, LDAP, NTLM, DPAPI, WMI/DCOM, MSSQL, and more.
+
+> **Beta Release** — under active development. If something isn't working, test the same operation with Impacket side-by-side and include both outputs in your [bug report](https://github.com/duty1g/jspacket/issues/new).
 
 
 ## Features
