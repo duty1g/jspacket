@@ -19,7 +19,7 @@ ${R}    |    |/  ___/${Y}|     ___/${R}\\__  \\ _/ ___\\|  |/ // __ \\   __\\
 ${R}/\\__|    |${Y}\\___ \\ |    |   ${R}  / __ \\\\  \\___|    <\\  ___/|  |
 ${R}\\________/${Y}____  >|____|   ${R} (____  /\\___  >__|_ \\\\___  >__|
 ${Y}              \\/           ${R}     \\/     \\/     \\/    \\/
-${R}  v${VERSION}${D} - by duty1g (https://github.com/duty1g/jspacket)${X}`;
+${R}  v${VERSION}${D}{#dev}${Y}@duty1g${X}`;
 
 export const EMPTY_LM_HASH = 'AAD3B435B51404EEAAD3B435B51404EE';
 
