@@ -1,9 +1,9 @@
-# JsPacket v0.1.0
+# JsPacket
 
 ![Stars](https://img.shields.io/github/stars/duty1g/jspacket)
 ![npm Version](https://img.shields.io/npm/v/jspacket)
 ![alt text](https://img.shields.io/github/languages/top/duty1g/jspacket)
-![License](https://img.shields.io/github/license/duty1g/jspacket)
+![License](https://img.shields.io/badge/License-Apache%202.0-green)
 ![Red Team](https://img.shields.io/badge/Red-Team-red)
 ![Pentesting](https://img.shields.io/badge/Pentesting-blue)
 <a href="https://twitter.com/duty_1g"><img src="https://img.shields.io/twitter/follow/duty_1g.svg?logo=twitter"></a>
