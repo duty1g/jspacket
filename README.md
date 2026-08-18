@@ -61,6 +61,41 @@ npx jspacket-secretsdump domain/user@target
 **Requirements:** Node.js 18+ (LTS recommended). No Python, no build tools, no native modules.
 
 
+## Running JsPacket
+
+```console
+$ jspacket-lookupsid 'CORP/pentest@dc01.corp.local' -hashes :aabbccddee1122334455667788990011
+
+     ____.      __________                __           __
+    |    | _____\______   \_____    ____ |  | __ _____/  |_
+    |    |/  ___/|     ___/\__  \ _/ ___\|  |/ // __ \   __\
+/\__|    |\___ \ |    |     / __ \\  \___|    <\  ___/|  |
+\________/____  >|____|    (____  /\___  >__|_ \\___  >__|
+              \/                \/     \/     \/    \/
+                                                v0.1.0{#dev}@duty1g
+
+[*] Brute forcing SIDs at dc01.corp.local
+[*] StringBinding ncacn_np:dc01.corp.local[\pipe\lsarpc]
+[*] Domain SID is: S-1-5-21-316352084-282881915-462937787
+498: CORP\Enterprise Read-only Domain Controllers (SidTypeGroup)
+500: CORP\Administrator (SidTypeUser)
+501: CORP\Guest (SidTypeUser)
+502: CORP\krbtgt (SidTypeUser)
+512: CORP\Domain Admins (SidTypeGroup)
+513: CORP\Domain Users (SidTypeGroup)
+514: CORP\Domain Guests (SidTypeGroup)
+515: CORP\Domain Computers (SidTypeGroup)
+516: CORP\Domain Controllers (SidTypeGroup)
+517: CORP\Cert Publishers (SidTypeAlias)
+518: CORP\Schema Admins (SidTypeGroup)
+519: CORP\Enterprise Admins (SidTypeGroup)
+1001: CORP\svc.backup (SidTypeUser)
+1002: CORP\svc.sql (SidTypeUser)
+1003: CORP\j.smith (SidTypeUser)
+1004: CORP\a.jones (SidTypeUser)
+```
+
+
 ## Usage
 
 Here are several examples to help you get started:
