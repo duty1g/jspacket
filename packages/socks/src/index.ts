@@ -39,13 +39,16 @@ export function initProxy(proxyArg?: string): void {
 
 function readExact(sock: Socket, n: number): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    let buf = Buffer.alloc(0);
+    const parts: Buffer[] = [];
+    let have = 0;
     const tryRead = () => {
-      while (buf.length < n) {
-        const chunk = sock.read(n - buf.length) as Buffer | null;
+      while (have < n) {
+        const chunk = sock.read(n - have) as Buffer | null;
         if (chunk === null) return;
-        buf = buf.length === 0 ? chunk : Buffer.concat([buf, chunk]);
+        parts.push(chunk);
+        have += chunk.length;
       }
+      const buf = parts.length === 1 ? parts[0]! : Buffer.concat(parts);
       sock.removeListener('readable', tryRead);
       sock.removeListener('error', onError);
       sock.removeListener('close', onClose);
