@@ -3505,7 +3505,7 @@ export async function hSamrSetNTInternal1(
     hashNTBuf = toBuffer(hashNT);
   }
 
-  const sessionKey = (dce as unknown as { get_rpc_transport: () => { get_smb_connection: () => { getSessionKey: SessionKeyProvider } } })
+  const sessionKey = (dce as unknown as { getRpcTransport: () => { getSmbConnection: () => { getSessionKey: SessionKeyProvider } } })
     .getRpcTransport()
     .getSmbConnection()
     .getSessionKey();
