@@ -8,7 +8,7 @@
 ![Pentesting](https://img.shields.io/badge/Pentesting-blue)
 <a href="https://twitter.com/duty_1g"><img src="https://img.shields.io/twitter/follow/duty_1g.svg?logo=twitter"></a>
 
-<p align="center"><img src="jspacket.png" width="50%"/></p>
+<p align="center"><img src="jspacket.png" width="75%"/></p>
 <h4 align="center">Impacket reimplemented in TypeScript and JavaScript.</h4>
 
 <p align="center">
