@@ -1,55 +1,100 @@
-<p align="center">
-  <img src="jspacket.png" alt="jspacket" width="480">
-</p>
+# JsPacket v0.1.0
+
+![Stars](https://img.shields.io/github/stars/duty1g/jspacket)
+![npm Version](https://img.shields.io/npm/v/jspacket)
+![alt text](https://img.shields.io/github/languages/top/duty1g/jspacket)
+![License](https://img.shields.io/github/license/duty1g/jspacket)
+![Red Team](https://img.shields.io/badge/Red-Team-red)
+![Pentesting](https://img.shields.io/badge/Pentesting-blue)
+<a href="https://twitter.com/duty_1g"><img src="https://img.shields.io/twitter/follow/duty_1g.svg?logo=twitter"></a>
+
+<p align="center"><img src="jspacket.png" width="50%"/></p>
+<h4 align="center">Impacket reimplemented in TypeScript and JavaScript.</h4>
 
 <p align="center">
-  <strong>TypeScript port of <a href="https://github.com/fortra/impacket">Impacket</a></strong><br>
-  52 tools &middot; 44 packages &middot; 152k lines &middot; Node.js 18+
-</p>
-
-<p align="center">
-  A lightweight, fast, and fully portable reimplementation of Impacket in TypeScript and JavaScript. No Python runtime, no native extensions — just <code>npm install</code> and go, or compile to a standalone binary. Ships as self-contained JavaScript bundles that run anywhere Node.js runs: Linux, macOS, Windows, WSL, Docker, and CI pipelines. Same tools, same flags, same output — if you know Impacket, you already know jspacket.
-</p>
-
-<p align="center">
-  <a href="#install">Install</a> &middot;
-  <a href="#tools">Tools</a> &middot;
-  <a href="#usage--examples">Usage</a> &middot;
-  <a href="#proxy-support">Proxy</a> &middot;
-  <a href="#platform-support">Platforms</a> &middot;
+  <a href="#features">Features</a> •
+  <a href="#install">Install</a> •
+  <a href="#usage">Usage</a> •
+  <a href="#tools">Tools</a> •
+  <a href="#proxy-support">Proxy</a> •
+  <a href="#platform-support">Platforms</a> •
   <a href="#contributing">Contributing</a>
 </p>
 
----
+#
 
 > **Beta Release — Highly Experimental.**
 > jspacket is under active development. Core tools have been tested against Active Directory lab environments, but edge cases and protocol quirks are expected. If something isn't working, please test the same operation with Impacket side-by-side and include both outputs in your bug report. This helps us quickly identify whether it's a jspacket-specific issue or a shared protocol limitation.
 
----
+JsPacket is a lightweight, fast, and fully portable reimplementation of [Impacket](https://github.com/fortra/impacket) in TypeScript and JavaScript. No Python runtime, no native extensions — just `npm install` and go, or compile to a standalone binary. Ships as self-contained JavaScript bundles that run anywhere Node.js runs: Linux, macOS, Windows, WSL, Docker, and CI pipelines. Same tools, same flags, same output — if you know Impacket, you already know jspacket.
 
-## What is jspacket?
+Built as a monorepo with 44 packages mirroring Impacket's module structure: SMB, DCE/RPC, Kerberos, LDAP, NTLM, DPAPI, WMI/DCOM, MSSQL, and more.
 
-jspacket is a ground-up TypeScript reimplementation of [Impacket](https://github.com/fortra/impacket) — the gold-standard Python library for working with Windows network protocols. Built as a pnpm monorepo with 44 packages mirroring Impacket's module structure, plus protocol insights from [GoPacket](https://github.com/duty1g/gopacket) (Go port).
+
+## Features
+
+- **52 CLI Tools:** Every Impacket example script — secretsdump, psexec, wmiexec, kerberoasting, and more.
+- **Lightweight:** Self-contained `.mjs` bundles, no Python, no C extensions, no native compilation.
+- **Fast:** V8-powered with native async I/O; concurrent operations run without the GIL.
+- **Portable:** Runs anywhere Node.js runs — Linux, macOS, Windows, WSL, Docker, CI pipelines.
+- **Drop-in Familiar:** Same flags, same output format — switch from Impacket without relearning.
+- **Native SOCKS5 Proxy:** Built-in `-proxy socks5://host:port` on all 52 tools for pivoting.
+- **Proxychains Compatible:** Works out of the box with `proxychains4` via LD_PRELOAD.
+- **Full Protocol Support:** SMB 1/2/3, DCE/RPC (20+ interfaces), Kerberos 5, LDAP, NTLM, DPAPI, WMI/DCOM, MSSQL TDS.
+- **Multiple Auth Methods:** Password, NTLM hash (pass-the-hash), Kerberos ccache, AES keys.
+- **44 Library Packages:** Modular `@impacket/*` packages mirroring Impacket's Python modules.
+- **Zero Dependencies:** No native modules — pure JavaScript at runtime.
+- **STDIN/STDOUT Integration:** Seamlessly integrate with other tools and workflows.
+
 
 ## Install
 
-```bash
+```console
 npm install -g jspacket
 ```
 
 Or run without installing:
 
-```bash
+```console
 npx jspacket-secretsdump domain/user@target
 ```
 
-## Usage & Examples
+**Requirements:** Node.js 18+ (LTS recommended). No Python, no build tools, no native modules.
 
-### Authentication
 
-jspacket supports the same authentication methods as Impacket:
+## Usage
 
-```bash
+Here are several examples to help you get started:
+
+**Credential Dumping (secretsdump):**
+```console
+# Full domain dump (SAM + LSA + NTDS via DRSUAPI)
+jspacket-secretsdump 'DOMAIN/admin@dc01' -hashes :nthash
+
+# Just NTDS (all domain hashes)
+jspacket-secretsdump 'DOMAIN/admin@dc01' -hashes :nthash -just-dc
+
+# Single user
+jspacket-secretsdump 'DOMAIN/admin@dc01' -hashes :nthash -just-dc-user krbtgt
+```
+
+**Remote Execution:**
+```console
+# PSExec shell
+jspacket-psexec 'DOMAIN/admin:password@target'
+
+# WMI-based shell (stealthier)
+jspacket-wmiexec 'DOMAIN/admin:password@target'
+
+# DCOM-based shell
+jspacket-dcomexec 'DOMAIN/admin:password@target'
+
+# Task-based (AT scheduler)
+jspacket-atexec 'DOMAIN/admin:password@target' 'whoami'
+```
+
+**Authentication Methods:**
+```console
 # Password
 jspacket-secretsdump 'DOMAIN/admin:Password123@dc01.domain.local'
 
@@ -64,38 +109,8 @@ jspacket-secretsdump 'DOMAIN/admin@dc01' -k -no-pass
 jspacket-getTGT 'DOMAIN/admin@dc01' -aesKey <aes256-key>
 ```
 
-### Credential dumping
-
-```bash
-# Full domain dump (SAM + LSA + NTDS via DRSUAPI)
-jspacket-secretsdump 'DOMAIN/admin@dc01' -hashes :nthash
-
-# Just NTDS (all domain hashes)
-jspacket-secretsdump 'DOMAIN/admin@dc01' -hashes :nthash -just-dc
-
-# Single user
-jspacket-secretsdump 'DOMAIN/admin@dc01' -hashes :nthash -just-dc-user krbtgt
-```
-
-### Remote execution
-
-```bash
-# PSExec shell
-jspacket-psexec 'DOMAIN/admin:password@target'
-
-# WMI-based shell (stealthier)
-jspacket-wmiexec 'DOMAIN/admin:password@target'
-
-# DCOM-based shell
-jspacket-dcomexec 'DOMAIN/admin:password@target'
-
-# Task-based (AT scheduler)
-jspacket-atexec 'DOMAIN/admin:password@target' 'whoami'
-```
-
-### Kerberos attacks
-
-```bash
+**Kerberos Attacks:**
+```console
 # Kerberoasting
 jspacket-GetUserSPNs 'DOMAIN/user:password@dc01' -request
 
@@ -109,9 +124,8 @@ jspacket-getTGT 'DOMAIN/user:password'
 jspacket-ticketer -nthash <krbtgt-hash> -domain-sid S-1-5-21-... -domain DOMAIN admin
 ```
 
-### AD enumeration
-
-```bash
+**AD Enumeration:**
+```console
 # Enumerate users
 jspacket-GetADUsers 'DOMAIN/user:password@dc01' -all
 
@@ -125,9 +139,8 @@ jspacket-lookupsid 'DOMAIN/user:password@dc01'
 jspacket-findDelegation 'DOMAIN/user:password@dc01'
 ```
 
-### SMB operations
-
-```bash
+**SMB Operations:**
+```console
 # Interactive SMB client
 jspacket-smbclient 'DOMAIN/user:password@target'
 
@@ -138,11 +151,21 @@ jspacket-services 'DOMAIN/admin:password@target' list
 jspacket-reg 'DOMAIN/admin:password@target' query -keyName HKLM\\SYSTEM\\CurrentControlSet
 ```
 
+**Pivoting Through a Proxy:**
+```console
+# Native -proxy flag
+jspacket-secretsdump 'DOMAIN/admin@dc' -hashes :nthash -proxy socks5://127.0.0.1:1080
+
+# Via proxychains
+proxychains4 jspacket-secretsdump 'DOMAIN/admin@dc' -hashes :nthash
+```
+
+
 ## Proxy Support
 
 All 52 tools support SOCKS5 proxying for pivoting through compromised networks:
 
-```bash
+```console
 # Native -proxy flag (recommended)
 jspacket-secretsdump 'DOMAIN/admin@dc' -hashes :nthash -proxy socks5://127.0.0.1:1080
 
@@ -159,6 +182,7 @@ proxychains4 jspacket-secretsdump 'DOMAIN/admin@dc' -hashes :nthash
 
 All connection types are routed through the proxy: SMB, DCE/RPC, LDAP, Kerberos.
 
+
 ## Platform Support
 
 | Platform | Status | Notes |
@@ -170,7 +194,6 @@ All connection types are routed through the proxy: SMB, DCE/RPC, LDAP, Kerberos.
 | Docker | Fully supported | `node:18-alpine` or any Node image |
 | CI/CD (GitHub Actions, etc.) | Fully supported | Single `npm install -g jspacket` step |
 
-**Requirements:** Node.js 18+ (LTS recommended). No Python, no build tools, no native modules.
 
 ## Tools
 
@@ -260,36 +283,10 @@ All 52 Impacket example scripts, ported and tested against live Active Directory
 | `jspacket-ntfs-read` | Raw NTFS volume reading |
 | `jspacket-filetime` | Windows FILETIME converter |
 
-## Packages
-
-44 packages under `packages/`, each mapping to an Impacket Python module:
-
-| Package | Maps to |
-|---------|---------|
-| `@impacket/structure` | `structure.py` — binary serialization DSL |
-| `@impacket/ntlm` | `ntlm.py` — NTLMSSP authentication |
-| `@impacket/krb5` | `krb5/*` — Kerberos 5 |
-| `@impacket/smb3` | `smb3.py` — SMB 2/3 client |
-| `@impacket/smb` | `smb.py` — SMB 1 client |
-| `@impacket/smb-connection` | `smbconnection.py` — unified SMB interface |
-| `@impacket/dcerpc` | `dcerpc/v5/*` — DCE/RPC + 20+ service interfaces |
-| `@impacket/ldap` | `ldap/*` — LDAP client + types |
-| `@impacket/crypto` | `crypto.py` — RC4, AES-CTS, DES, KDF, NTLM hash |
-| `@impacket/dpapi` | `dpapi.py` — DPAPI structures and decryption |
-| `@impacket/ese` | `ese.py` — ESE/JET database engine |
-| `@impacket/winregistry` | `winregistry.py` — offline registry hive parser |
-| `@impacket/tds` | `tds.py` — TDS protocol (SQL Server) |
-| `@impacket/nmb` | `nmb.py` — NetBIOS session transport |
-| `@impacket/spnego` | `spnego.py` — SPNEGO/GSS-API |
-| `@impacket/asn1` | ASN.1 DER/BER codec |
-| `@impacket/smb-server` | SMB server implementation |
-| `@impacket/socks` | SOCKS5 proxy client |
-| `@impacket/examples` | Shared CLI helpers, logging, parsers |
-| ... | *+ 25 more (uuid, acl, http, mqtt, dns, etc.)* |
 
 ## Development
 
-```bash
+```console
 # Clone and install
 git clone https://github.com/duty1g/jspacket
 cd jspacket
@@ -311,26 +308,6 @@ pnpm typecheck
 cd tools && node build.mjs
 ```
 
-### Project structure
-
-```
-jspacket/
-  packages/          # 44 library packages (@impacket/*)
-    structure/       # Binary serialization DSL
-    ntlm/            # NTLMSSP authentication
-    krb5/            # Kerberos 5
-    smb3/            # SMB 2/3 client
-    dcerpc/          # DCE/RPC + service interfaces
-    ldap/            # LDAP client
-    crypto/          # Crypto primitives
-    socks/           # SOCKS5 proxy support
-    ...
-  tools/
-    src/             # 52 CLI tools (TypeScript source)
-    dist/            # Built tools (standalone .mjs bundles)
-    build.mjs        # esbuild bundler
-    package.json     # npm package config (publishable as "jspacket")
-```
 
 ## Contributing
 
@@ -340,12 +317,11 @@ Contributions are welcome. jspacket is a large codebase — here's how to get st
 2. **Test against Impacket** — run the same command with both tools and compare output
 3. **Submit a PR** — keep changes focused; one tool/package per PR when possible
 
-### Guidelines
-
 - Match Impacket's output format and flag names so users can switch seamlessly
 - Use the existing `@impacket/*` packages rather than adding new dependencies
 - Every tool should be testable with `npx tsx tools/src/<tool>.ts` in dev mode
 - Include the Impacket command you tested against in your PR description
+
 
 ## Reporting Issues
 
@@ -358,11 +334,17 @@ Found a bug? Please [open an issue](https://github.com/duty1g/jspacket/issues/ne
 
 Side-by-side comparison with Impacket is the fastest way to triage — it tells us immediately whether the issue is in our protocol implementation or something upstream.
 
-## Credits
+---
+
+### Credits
 
 - [Impacket](https://github.com/fortra/impacket) by Fortra (Alberto Solino / @agsolino) — the original Python implementation that jspacket ports from
 - [GoPacket](https://github.com/duty1g/gopacket) — Go port of Impacket, used as a secondary reference for protocol edge cases
 
-## License
+---
+
+### License
 
 Modified Apache License, inherited from Impacket. See [LICENSE](./LICENSE).
+
+Made with by [@duty1g](https://github.com/duty1g)
