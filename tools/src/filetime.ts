@@ -406,7 +406,7 @@ async function main(): Promise<void> {
   if (options === null) process.exit(1);
 
   initLogger({ debug: options.debug });
-  initProxy(options.proxy);
+  initProxy(options.proxy ?? undefined);
 
   if (options.action === null || !VALID_FILETIME_ACTIONS.includes(options.action)) {
     logError(`Invalid action '${options.action}'`);

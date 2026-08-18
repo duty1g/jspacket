@@ -793,7 +793,7 @@ async function main(): Promise<void> {
 
   let groups = DEFAULT_GROUPS;
   if (values.groups) {
-    groups = values.groups.split(',').map((s) => {
+    groups = values.groups.split(',').map((s: string) => {
       const n = parseInt(s.trim(), 10);
       if (Number.isNaN(n)) {
         critical(`Invalid group RID: ${s}`);
@@ -805,7 +805,7 @@ async function main(): Promise<void> {
 
   let extraSid: string[] = [];
   if (values['extra-sid']) {
-    extraSid = values['extra-sid'].split(',').map((s) => s.trim());
+    extraSid = values['extra-sid'].split(',').map((s: string) => s.trim());
   }
 
   const duration = values.duration ? parseInt(values.duration, 10) : DEFAULT_DURATION;
