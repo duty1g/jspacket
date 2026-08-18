@@ -3992,7 +3992,8 @@ export class SMBSERVER extends EventEmitter {
         return responses;
       }
 
-      const handler = this._smbCommands[commandCode] || this._smbCommands[0xff];
+      const handler = this._smbCommands[commandCode] ?? this._smbCommands[0xff];
+      if (!handler) throw new Error(`No SMB handler for command 0x${commandCode.toString(16)}`);
 
       const [respCommands, respPacketOverride, errorCode] = handler(connId, this, smbCommand, packet);
 
