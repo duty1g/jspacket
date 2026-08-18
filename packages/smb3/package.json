@@ -1,0 +1,30 @@
+{
+  "name": "@impacket/smb3",
+  "version": "0.1.0",
+  "description": "SMB2/SMB3 protocol structures and transport (impacket smb3.py, smb3structs.py)",
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "type": "module",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@impacket/crypto": "workspace:*",
+    "@impacket/nmb": "workspace:*",
+    "@impacket/ntlm": "workspace:*",
+    "@impacket/spnego": "workspace:*",
+    "@impacket/structure": "workspace:*",
+    "@impacket/krb5": "workspace:*"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  }
+}

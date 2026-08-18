@@ -1,0 +1,26 @@
+{
+  "name": "@impacket/icmp6",
+  "version": "0.1.0",
+  "description": "ICMPv6 protocol (impacket ICMP6.py)",
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "type": "module",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "files": ["dist"],
+  "dependencies": {
+    "@impacket/impact": "workspace:*",
+    "@impacket/ip6": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  }
+}

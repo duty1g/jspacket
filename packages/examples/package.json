@@ -1,0 +1,43 @@
+{
+  "name": "@impacket/examples",
+  "version": "0.1.0",
+  "description": "Shared library code for impacket CLI tools (secretsdump, smbclient, etc.)",
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "type": "module",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "files": ["dist"],
+  "dependencies": {
+    "@impacket/socks": "workspace:*",
+    "@impacket/structure": "workspace:*",
+    "@impacket/crypto": "workspace:*",
+    "@impacket/ntlm": "workspace:*",
+    "@impacket/smb": "workspace:*",
+    "@impacket/smb3": "workspace:*",
+    "@impacket/smb-connection": "workspace:*",
+    "@impacket/smb-server": "workspace:*",
+    "@impacket/dcerpc": "workspace:*",
+    "@impacket/krb5": "workspace:*",
+    "@impacket/ldap": "workspace:*",
+    "@impacket/dpapi": "workspace:*",
+    "@impacket/ese": "workspace:*",
+    "@impacket/winregistry": "workspace:*",
+    "@impacket/nmb": "workspace:*",
+    "@impacket/tds": "workspace:*",
+    "@impacket/nt-errors": "workspace:*",
+    "@impacket/system-errors": "workspace:*",
+    "@impacket/uuid": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  }
+}
