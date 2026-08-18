@@ -145,7 +145,8 @@ describe('wkst structures', () => {
     expect(data.length).toBeGreaterThan(0);
 
     const parsed = new USE_INFO_2(data);
-    expect(parsed.get('ui2_username')).toBeTruthy();
+    const username = parsed.get('ui2_username');
+    expect(typeof username).toBe('string');
   });
 
   it('JOINPR_ENCRYPTED_USER_PASSWORD is 524 bytes with 1-byte alignment', () => {
