@@ -30,8 +30,6 @@ Thumbs.db
 # Bun
 bun.lockb
 
-# pnpm
-pnpm-lock.yaml
 
 # Dev notes (not shipped)
 ROADMAP.md
