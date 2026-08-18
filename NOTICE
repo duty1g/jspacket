@@ -1,0 +1,13 @@
+jspacket
+Copyright 2024-2026 duty1g (https://github.com/duty1g)
+
+This product is licensed under a modified Apache Software License, Version 1.1,
+inherited from Impacket. The full license text is available in the LICENSE file.
+
+## Acknowledgments
+
+jspacket is a TypeScript port of Impacket
+(https://github.com/fortra/impacket), originally created by SecureAuth
+Corporation and maintained by Fortra. Protocol implementations, structures,
+and CLI tools are derived from Impacket's Python source code and ported to
+TypeScript under the terms of Impacket's modified Apache License.
