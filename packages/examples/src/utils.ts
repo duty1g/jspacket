@@ -9,8 +9,6 @@ const credentialRegex = /(?:(?:([^/:]*)\/)?([^:]*)(?::(.*))?)?/;
 
 export const VERSION = '0.1.0';
 const R = '\x1b[1;91m';
-const Y = '\x1b[1;33m';
-const D = '\x1b[0;90m';
 const X = '\x1b[0m';
 const ASCII_ART = String.raw`
      ____.      __________                __           __
@@ -19,8 +17,7 @@ const ASCII_ART = String.raw`
 /\__|    |\___ \ |    |     / __ \\  \___|    <\  ___/|  |
 \________/____  >|____|    (____  /\___  >__|_ \\___  >__|
               \/                \/     \/     \/    \/`;
-export const BANNER = `${R}${ASCII_ART}
-  \x1b[32mv${VERSION}${D}{#dev}${Y}@duty1g${X}`;
+export const BANNER = `${R}${ASCII_ART}          v${R}${VERSION}\x1b[96m{\x1b[32m#dev}${X}@\x1b[93mduty1g${X}`;
 
 export const EMPTY_LM_HASH = 'AAD3B435B51404EEAAD3B435B51404EE';
 
