@@ -30,4 +30,5 @@ for (const tool of tools) {
 }
 
 copyFileSync(join('..', 'README.md'), 'README.md');
+copyFileSync(join('..', 'LICENSE'), 'LICENSE');
 console.log(`Built ${tools.length} tools → dist/`);

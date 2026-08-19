@@ -1,16 +1,17 @@
 {
   "name": "jspacket",
-  "version": "0.1.3",
-  "description": "TypeScript port of Impacket — 52 tools for Active Directory and network protocol pentesting",
+  "version": "0.1.4",
+  "description": "A lightweight, fast, and fully portable reimplementation of Impacket in TypeScript and JavaScript.",
   "author": "duty1g",
-  "license": "SEE LICENSE IN ../LICENSE",
+  "license": "Apache-1.1",
   "type": "module",
   "engines": {
     "node": ">=18.0.0"
   },
   "files": [
     "dist/*.mjs",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "bin": {
     "jspacket-secretsdump": "./dist/secretsdump.mjs",

@@ -7,7 +7,7 @@ export { initProxy, setGlobalProxy, getGlobalProxy } from '@impacket/socks';
 const targetRegex = /(?:(?:([^/@:]*)\/)?(([^@:]+))(?::([^@]*))?@)?(.*)/;
 const credentialRegex = /(?:(?:([^/:]*)\/)?([^:]*)(?::(.*))?)?/;
 
-export const VERSION = '0.1.3';
+export const VERSION = '0.1.4';
 const C = '\x1b[38;2;78;201;176m';
 const X = '\x1b[0m';
 const ASCII_ART = String.raw`
