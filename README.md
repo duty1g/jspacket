@@ -1,14 +1,14 @@
 # jspacket
 
 ![Stars](https://img.shields.io/github/stars/duty1g/jspacket)
-![npm Version](https://img.shields.io/npm/v/jspacket)
+[![npm Version](https://img.shields.io/npm/v/jspacket)](https://www.npmjs.com/package/jspacket)
 ![alt text](https://img.shields.io/github/languages/top/duty1g/jspacket)
 ![License](https://img.shields.io/badge/License-Apache%202.0-green)
-![Red Team](https://img.shields.io/badge/Red-Team-red)
-![Pentesting](https://img.shields.io/badge/Pentesting-blue)
+[![Red Team](https://img.shields.io/badge/Red-Team-red)](https://duty1g.online)
+[![Pentesting](https://img.shields.io/badge/Pentesting-blue)](https://duty1g.online)
 <a href="https://twitter.com/duty_1g"><img src="https://img.shields.io/twitter/follow/duty_1g.svg?logo=twitter"></a>
 
-<p align="center"><img src="jspacket.png" width="75%"/></p>
+<p align="center"><img src="https://raw.githubusercontent.com/duty1g/jspacket/main/jspacket.png" width="75%"/></p>
 <h4 align="center">Impacket reimplemented in TypeScript and JavaScript.</h4>
 
 <p align="center">
