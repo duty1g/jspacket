@@ -9,7 +9,8 @@
     "node": ">=18.0.0"
   },
   "files": [
-    "dist/*.mjs"
+    "dist/*.mjs",
+    "README.md"
   ],
   "bin": {
     "jspacket-secretsdump": "./dist/secretsdump.mjs",

@@ -1,5 +1,5 @@
 import { build } from 'esbuild';
-import { readdirSync, readFileSync, writeFileSync, chmodSync } from 'fs';
+import { readdirSync, readFileSync, writeFileSync, chmodSync, copyFileSync } from 'fs';
 import { join } from 'path';
 
 const tools = readdirSync('src')
@@ -29,4 +29,5 @@ for (const tool of tools) {
   chmodSync(p, 0o755);
 }
 
+copyFileSync(join('..', 'README.md'), 'README.md');
 console.log(`Built ${tools.length} tools → dist/`);
