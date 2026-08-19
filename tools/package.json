@@ -1,6 +1,6 @@
 {
   "name": "jspacket",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TypeScript port of Impacket — 52 tools for Active Directory and network protocol pentesting",
   "author": "duty1g",
   "license": "SEE LICENSE IN ../LICENSE",
