@@ -24,7 +24,6 @@
 import { Buffer } from 'node:buffer';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { createInterface } from 'node:readline';
 import { parseArgs } from 'node:util';
 import {
   parseTarget,
@@ -247,6 +246,11 @@ async function runStdoutPipe(
       process.stdout.write(toPrint);
     }
   }
+
+  if (outputBuffer.length > 0) {
+    const remaining = outputBuffer.toString(codec as BufferEncoding);
+    process.stdout.write(remaining + '\n');
+  }
 }
 
 // --------------------------------------------------------------------------
@@ -304,7 +308,8 @@ async function runStdinPipe(
     codec,
   );
 
-  const rl = createInterface({ input: process.stdin, output: process.stdout, prompt: '' });
+  const { createInterface } = await import('node:readline');
+  const rl = createInterface({ input: process.stdin, output: process.stdout, terminal: false });
 
   console.log('[!] Press help for extra shell commands');
 
@@ -319,14 +324,12 @@ async function runStdinPipe(
  lget {file}                 - downloads pathname RELATIVE to the connected share (${share}) to the current local dir
  ! {cmd}                    - executes a local shell cmd
 `);
-        const data = Buffer.from('\r\n', codec as BufferEncoding);
-        await server.writeFile(tid, fid, data);
+        await server.writeFile(tid, fid, Buffer.from('\r\n', codec as BufferEncoding));
         return;
       }
 
       if (trimmed === 'exit') {
-        const data = Buffer.from('exit\r\n', codec as BufferEncoding);
-        await server.writeFile(tid, fid, data);
+        await server.writeFile(tid, fid, Buffer.from('exit\r\n', codec as BufferEncoding));
         rl.close();
         process.exit(0);
         return;
@@ -337,22 +340,18 @@ async function runStdinPipe(
         if (dir === '') {
           console.log(process.cwd());
         } else {
-          process.chdir(dir);
+          try { process.chdir(dir); } catch (e) { console.log(String(e)); }
         }
-        const data = Buffer.from('\r\n', codec as BufferEncoding);
-        await server.writeFile(tid, fid, data);
+        await server.writeFile(tid, fid, Buffer.from('\r\n', codec as BufferEncoding));
         return;
       }
 
-      // Default: send the command
-      const data = Buffer.from(line + '\r\n', codec as BufferEncoding);
-      await server.writeFile(tid, fid, data);
+      await server.writeFile(tid, fid, Buffer.from(line + '\r\n', codec as BufferEncoding));
     } catch (e) {
       error(`Error writing to pipe: ${e}`);
     }
   });
 
-  // Wait indefinitely (stdin pipe stays open until shell exits)
   await new Promise<void>((resolve) => {
     rl.on('close', resolve);
   });
@@ -551,9 +550,14 @@ class PSEXEC {
         // Comm pipe read failed — wait for stdout/stderr to finish instead
         await Promise.race([
           Promise.all([stdoutPromise, stderrPromise]),
-          new Promise((r) => setTimeout(r, 5000)),
+          new Promise((r) => setTimeout(r, 10000)),
         ]);
       }
+
+      await Promise.race([
+        Promise.all([stdoutPromise, stderrPromise]),
+        new Promise((r) => setTimeout(r, 10000)),
+      ]);
 
       await installService.uninstall();
       if (this.copyFile) {

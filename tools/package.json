@@ -1,6 +1,6 @@
 {
   "name": "jspacket",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A lightweight, fast, and fully portable reimplementation of Impacket in TypeScript and JavaScript.",
   "author": "duty1g",
   "license": "Apache-1.1",

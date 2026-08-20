@@ -6,6 +6,8 @@ import * as ntlm from '@impacket/ntlm';
 import { DCERPCException, DCERPC_v5, type IDCERPCTransport } from './rpcrt';
 import { SMBConnection } from '@impacket/smb-connection';
 import { getGlobalProxy, createSocket } from '@impacket/socks';
+import { RPCProxyClient, type RpcProxyUrl } from './rpch.js';
+import type { AuthType } from '@impacket/http';
 
 const PARSER_RE =
   /^(?:([0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})@)?([_a-zA-Z0-9]*):([^\[]*)(?:\[([^\]]*)\])?/;
@@ -88,6 +90,10 @@ export function DCERPCTransportFactory(stringbinding: string): DCERPCTransport {
     let namedPipe = sb.getEndpoint();
     if (namedPipe.startsWith('\\pipe')) namedPipe = namedPipe.slice('\\pipe'.length);
     rpctransport = new SMBTransport(na, 445, namedPipe);
+  } else if (ps === 'ncacn_http') {
+    const port = sb.getEndpoint();
+    const rpcProxyHost = sb.isOptionSet('RpcProxy') ? sb.getOption('RpcProxy') : null;
+    rpctransport = new RPCHTTPTransport(na, port ? Number(port) : 593, rpcProxyHost);
   } else {
     throw new DCERPCException(`Unknown protocol sequence: ${ps}`);
   }
@@ -483,5 +489,70 @@ export class SMBTransport extends DCERPCTransport {
   doesSupportNTLMv2(): boolean {
     if (!this.smbConnection) return ntlm.USE_NTLMv2;
     return this.smbConnection.doesSupportNTLMv2();
+  }
+}
+
+export class RPCHTTPTransport extends DCERPCTransport {
+  private rpcProxy: RPCProxyClient;
+  private rpcProxyHost: string | null;
+
+  constructor(remoteName: string, dstport = 593, rpcProxyHost: string | null = null) {
+    super(remoteName, dstport);
+    this.rpcProxyHost = rpcProxyHost;
+    this.rpcProxy = new RPCProxyClient(remoteName, dstport);
+  }
+
+  override setCredentials(
+    username: string, password: string, domain = '',
+    lmhash = '', nthash = '',
+    aesKey: string | null = null,
+    TGT: unknown = null, TGS: unknown = null,
+  ): void {
+    super.setCredentials(username, password, domain, lmhash, nthash, aesKey, TGT, TGS);
+    this.rpcProxy.setCredentials(username, password, domain, lmhash, nthash);
+  }
+
+  setAuthType(authType: AuthType): void {
+    this.rpcProxy.setAuthType(authType);
+  }
+
+  getRpcProxyClient(): RPCProxyClient { return this.rpcProxy; }
+
+  override setStringBinding(sb: DCERPCStringBinding): void {
+    super.setStringBinding(sb);
+    this.rpcProxy._stringbinding = sb;
+  }
+
+  async connect(): Promise<void> {
+    const proxyTarget = this.rpcProxyHost ?? this.remoteName;
+    const [host, portStr] = proxyTarget.includes(':')
+      ? proxyTarget.split(':')
+      : [proxyTarget, '443'];
+
+    const url: RpcProxyUrl = {
+      scheme: 'https',
+      netloc: `${host}:${portStr}`,
+      path: '/rpc/rpcproxy.dll',
+      query: '',
+    };
+    this.rpcProxy._rpcProxyUrl = url;
+
+    if (this.stringbinding) {
+      this.rpcProxy._stringbinding = this.stringbinding;
+    }
+
+    await this.rpcProxy.connectProxy();
+  }
+
+  async send(data: Buffer, forceWriteAndx = 0, forceRecv = 0): Promise<void> {
+    await this.rpcProxy.send(data, forceWriteAndx, forceRecv);
+  }
+
+  async recv(forceRecv = 0, count = 0): Promise<Buffer> {
+    return this.rpcProxy.recv(forceRecv, count);
+  }
+
+  async disconnect(): Promise<void> {
+    this.rpcProxy.disconnectProxy();
   }
 }

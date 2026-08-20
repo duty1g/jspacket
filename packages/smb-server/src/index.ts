@@ -4173,6 +4173,7 @@ export class SMBSERVER extends EventEmitter {
   listen(port?: number, host?: string): void {
     const p = port ?? this._listenPort;
     const h = host ?? this._serverAddress;
+    this._server.once('error', (err: Error) => this.emit('error', err));
     this._server.listen(p, h, () => {
       this.emit('listening', { port: p, host: h });
     });

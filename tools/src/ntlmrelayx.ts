@@ -25,6 +25,7 @@ import {
   normalizeArgs,
   BANNER,
   initProxy,
+  setReadline,
 } from '@impacket/examples';
 import {
   NTLMRelayxConfig,
@@ -545,8 +546,12 @@ async function main(): Promise<void> {
         const smbPort = Number(values['smb-port'] ?? 445);
         config.listeningPort = smbPort;
         const srv = new SMBRelayServer(config);
-        srv.start();
-        activeServers.push(srv);
+        try {
+          await srv.start();
+          activeServers.push(srv);
+        } catch (e: any) {
+          logError(`SMB Server on port ${smbPort} failed: ${e.code === 'EACCES' ? 'permission denied (port in use or requires admin)' : e.message}`);
+        }
         break;
       }
       case 'HTTPRelayServer': {
@@ -556,8 +561,12 @@ async function main(): Promise<void> {
           Object.assign(httpConfig, config);
           httpConfig.listeningPort = port;
           const srv = new HTTPRelayServer(httpConfig);
-          srv.start();
-          activeServers.push(srv);
+          try {
+            await srv.start();
+            activeServers.push(srv);
+          } catch (e: any) {
+            logError(`HTTP Server on port ${port} failed: ${e.code === 'EACCES' ? 'permission denied (port in use or requires admin)' : e.message}`);
+          }
         }
         break;
       }
@@ -581,6 +590,7 @@ async function main(): Promise<void> {
   // --- MiniShell (stdin command loop) ----------------------------------------
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   rl.setPrompt('ntlmrelayx> ');
+  setReadline(rl);
   rl.prompt();
 
   rl.on('line', (line: string) => {
@@ -614,6 +624,7 @@ async function main(): Promise<void> {
   });
 
   rl.on('close', () => {
+    setReadline(null);
     for (const srv of activeServers) srv.stop();
     targetWatcher?.stop();
   });

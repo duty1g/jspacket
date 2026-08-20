@@ -34,7 +34,7 @@ export class HTTPRelayServer {
     this.config = config;
   }
 
-  start(): void {
+  start(): Promise<void> {
     const port = this.config.listeningPort ?? 80;
     const handler = (req: http.IncomingMessage, res: http.ServerResponse) =>
       this.handleRequest(req, res);
@@ -49,8 +49,14 @@ export class HTTPRelayServer {
       this.server = http.createServer(handler);
     }
 
-    this.server!.listen(port, this.config.interfaceIp ?? '0.0.0.0', () => {
-      info(`Setting up HTTP Server on port ${port}`);
+    info(`Setting up HTTP Server on port ${port}`);
+    return new Promise<void>((resolve, reject) => {
+      this.server!.once('error', reject);
+      this.server!.once('listening', () => {
+        this.server!.removeListener('error', reject);
+        resolve();
+      });
+      this.server!.listen(port, this.config.interfaceIp ?? '0.0.0.0');
     });
   }
 

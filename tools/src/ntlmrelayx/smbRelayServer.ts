@@ -679,9 +679,17 @@ export class SMBRelayServer {
     }
   }
 
-  start(): void {
-    info(`Setting up SMB Server on port ${this.config.listeningPort ?? 445}`);
-    this.server.serveForever();
+  start(): Promise<void> {
+    const port = this.config.listeningPort ?? 445;
+    info(`Setting up SMB Server on port ${port}`);
+    return new Promise<void>((resolve, reject) => {
+      this.server.once('error', reject);
+      this.server.once('listening', () => {
+        this.server.removeListener('error', reject);
+        resolve();
+      });
+      this.server.serveForever();
+    });
   }
 
   stop(): void {

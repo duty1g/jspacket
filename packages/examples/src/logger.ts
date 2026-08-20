@@ -1,3 +1,5 @@
+import * as readline from 'node:readline';
+
 export enum LogLevel {
   DEBUG = 10,
   INFO = 20,
@@ -16,6 +18,7 @@ const BULLETS: Record<number, string> = {
 
 let currentLevel = LogLevel.INFO;
 let useTimestamp = false;
+let activeRl: import('node:readline').Interface | null = null;
 
 function formatMessage(level: LogLevel, message: string): string {
   const bullet = BULLETS[level] ?? '[-]';
@@ -29,10 +32,15 @@ function formatMessage(level: LogLevel, message: string): string {
 function log(level: LogLevel, message: string): void {
   if (level < currentLevel) return;
   const formatted = formatMessage(level, message);
-  if (level >= LogLevel.ERROR) {
-    process.stderr.write(formatted + '\n');
+  const stream = level >= LogLevel.ERROR ? process.stderr : process.stdout;
+  if (activeRl) {
+    const rl = activeRl as any;
+    readline.cursorTo(stream, 0);
+    readline.clearLine(stream, 0);
+    stream.write(formatted + '\n');
+    rl._refreshLine();
   } else {
-    process.stdout.write(formatted + '\n');
+    stream.write(formatted + '\n');
   }
 }
 
@@ -49,3 +57,4 @@ export function critical(message: string): void { log(LogLevel.CRITICAL, message
 
 export function setLevel(level: LogLevel): void { currentLevel = level; }
 export function getLevel(): LogLevel { return currentLevel; }
+export function setReadline(rl: import('node:readline').Interface | null): void { activeRl = rl; }

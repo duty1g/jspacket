@@ -11,10 +11,17 @@ import * as tls from 'node:tls';
 import { Structure, type FieldDescriptor } from '@impacket/structure';
 import * as uuidMod from '@impacket/uuid';
 import { EMPTY_UUID } from '@impacket/uuid';
-import { NTLMSSP_AV_HOSTNAME } from '@impacket/ntlm';
+import {
+  NTLMSSP_AV_HOSTNAME,
+  getNTLMSSPType1,
+  getNTLMSSPType3,
+  NTLMAuthChallenge,
+  AV_PAIRS,
+} from '@impacket/ntlm';
+import type { NTLMAuthNegotiate } from '@impacket/ntlm';
 import { ERROR_MESSAGES as SYSTEM_ERROR_MESSAGES } from '@impacket/system-errors';
 import { ERROR_MESSAGES as NT_ERROR_MESSAGES } from '@impacket/nt-errors';
-import { HTTPClientSecurityProvider, AUTH_BASIC } from '@impacket/http';
+import { HTTPClientSecurityProvider, AUTH_BASIC, AUTH_NTLM } from '@impacket/http';
 import {
   DCERPCException,
   MSRPCHeader,
@@ -596,6 +603,12 @@ export class RPCProxyClient extends HTTPClientSecurityProvider {
     this.setCredentials(username, password, domain, lmhash, nthash);
   }
 
+  private _ntlmUsername = '';
+  private _ntlmPassword = '';
+  private _ntlmDomain = '';
+  private _ntlmLmhash: Buffer | string = '';
+  private _ntlmNthash: Buffer | string = '';
+
   override setCredentials(
     username: string,
     password: string,
@@ -607,6 +620,19 @@ export class RPCProxyClient extends HTTPClientSecurityProvider {
     TGS: unknown = null,
   ): void {
     super.setCredentials(username, password, domain, lmhash, nthash, aesKey, TGT, TGS);
+    this._ntlmUsername = username;
+    this._ntlmPassword = password;
+    this._ntlmDomain = domain;
+    if (lmhash !== '' || nthash !== '') {
+      let lm = lmhash; let nt = nthash;
+      if (lm.length % 2) lm = '0' + lm;
+      if (nt.length % 2) nt = '0' + nt;
+      try { this._ntlmLmhash = Buffer.from(lm, 'hex'); } catch { this._ntlmLmhash = lm; }
+      try { this._ntlmNthash = Buffer.from(nt, 'hex'); } catch { this._ntlmNthash = nt; }
+    } else {
+      this._ntlmLmhash = '';
+      this._ntlmNthash = '';
+    }
   }
 
   async createRpcInChannel(): Promise<void> {
@@ -621,63 +647,154 @@ export class RPCProxyClient extends HTTPClientSecurityProvider {
     await this.createChannel('RPC_OUT_DATA', headers);
   }
 
+  private async readHttpResponse(socket: net.Socket): Promise<{ statusCode: number; headers: Record<string, string>; raw: Buffer }> {
+    let buf = Buffer.alloc(0);
+    while (!buf.includes(Buffer.from('\r\n\r\n'))) {
+      const chunk = await socketRecv(socket, RPCProxyClient.RECV_SIZE);
+      if (chunk.length === 0) throw new RPCProxyClientException('Connection closed during HTTP response');
+      buf = Buffer.concat([buf, chunk]);
+    }
+    const headerEnd = buf.indexOf(Buffer.from('\r\n\r\n'));
+    const headerSection = buf.subarray(0, headerEnd).toString('ascii');
+    const lines = headerSection.split('\r\n');
+    const statusLine = lines[0]!;
+    const statusMatch = /HTTP\/\d\.\d (\d+)/.exec(statusLine);
+    const statusCode = statusMatch ? parseInt(statusMatch[1]!, 10) : 0;
+    const headers: Record<string, string> = {};
+    for (let i = 1; i < lines.length; i++) {
+      const idx = lines[i]!.indexOf(': ');
+      if (idx >= 0) {
+        const key = lines[i]!.substring(0, idx).toLowerCase();
+        const val = lines[i]!.substring(idx + 2);
+        if (key in headers) {
+          headers[key] += ', ' + val;
+        } else {
+          headers[key] = val;
+        }
+      }
+    }
+    return { statusCode, headers, raw: buf };
+  }
+
+  private buildHttpRequest(method: string, path: string, headers: Record<string, string>): Buffer {
+    const requestLine = `${method} ${path} HTTP/1.1\r\n`;
+    const headerLines = Object.entries(headers).map(([k, v]) => `${k}: ${v}`).join('\r\n');
+    return Buffer.from(requestLine + headerLines + '\r\n\r\n', 'ascii');
+  }
+
+  private ntlmType1: NTLMAuthNegotiate | null = null;
+
   private async createChannel(method: string, headers: Record<string, string>): Promise<void> {
     if (!this._rpcProxyUrl) {
       throw new RPCProxyClientException('RPC Proxy URL not set');
     }
 
     const url = this._rpcProxyUrl;
+    const authType = this.getAuthType();
+    this.authType = authType;
 
-    // Create socket connection to proxy
-    const socket = await this.connectSocket(url.scheme, url.netloc);
-    this.channels[method] = socket;
-
-    // Get authentication headers
-    const authHeaders = this.getAuthHeadersForChannel(headers);
-
-    const headersFinal: Record<string, string> = {};
-    Object.assign(headersFinal, headers);
-    Object.assign(headersFinal, authHeaders);
-
-    this.authType = this.getAuthType();
-
-    // To connect to an RPC Server, we need to let the RPC Proxy know
-    // where to connect. The target RPC Server name and its port are passed
-    // in the query of the HTTP request.
-    //
-    // The utilized format: /rpc/rpcproxy.dll?RemoteName:RemotePort
-    if (!this.remoteName && this.authType === AUTH_BASIC) {
+    if (!this.remoteName && authType === AUTH_BASIC) {
       throw new RPCProxyClientException(RPC_PROXY_REMOTE_NAME_NEEDED_ERR);
-    }
-
-    if (!this.remoteName) {
-      const ntlmssp = this.getNtlmsspInfo() as Map<number, [number, Buffer]> | null;
-      if (ntlmssp) {
-        const hostnameEntry = ntlmssp.get(NTLMSSP_AV_HOSTNAME);
-        if (hostnameEntry) {
-          this.remoteName = hostnameEntry[1].toString('utf16le');
-        }
-      }
-      if (this.remoteName && this._stringbinding) {
-        this._stringbinding.setNetworkAddress(this.remoteName);
-        console.debug(`StringBinding has been changed to ${this._stringbinding.toString()}`);
-      }
     }
 
     if (!url.query) {
       url.query = `${this.remoteName}:${this.dstport}`;
     }
-
     const path = url.path + '?' + url.query;
 
-    // Send the HTTP request manually on the raw socket
-    const requestLine = `${method} ${path} HTTP/1.1\r\n`;
-    const headerLines = Object.entries(headersFinal)
-      .map(([k, v]) => `${k}: ${v}`)
-      .join('\r\n');
-    const httpRequest = Buffer.from(requestLine + headerLines + '\r\n\r\n', 'ascii');
-    await socketSend(socket, httpRequest);
+    let socket = await this.connectSocket(url.scheme, url.netloc);
 
+    if (authType === AUTH_BASIC) {
+      this.channels[method] = socket;
+      const [basicHeaders] = this.getAuthHeadersBasic();
+      const finalHeaders = { ...headers, ...basicHeaders };
+      finalHeaders['Host'] = url.netloc;
+      await socketSend(socket, this.buildHttpRequest(method, path, finalHeaders));
+      await this.read100Continue(method);
+      return;
+    }
+
+    // NTLM authentication over raw socket (3-step handshake)
+    // Step 1: Send Type1 (Negotiate) message
+    const type1 = getNTLMSSPType1('', '', false, true);
+    this.ntlmType1 = type1;
+    const type1Data = type1.getData();
+
+    const authHeaders1: Record<string, string> = {
+      'User-Agent': 'MSRPC',
+      'Host': url.netloc,
+      'Connection': 'Keep-Alive',
+      'Content-Length': '0',
+      'Authorization': `NTLM ${type1Data.toString('base64')}`,
+    };
+
+    await socketSend(socket, this.buildHttpRequest(method, path, authHeaders1));
+    const resp1 = await this.readHttpResponse(socket);
+
+    if (resp1.statusCode !== 401) {
+      throw new RPCProxyClientException(
+        `NTLM Type1: expected 401, got ${resp1.statusCode}`,
+      );
+    }
+
+    // Extract Type2 (Challenge) from WWW-Authenticate header
+    const wwwAuth = resp1.headers['www-authenticate'] ?? '';
+    const type2Match = /NTLM ([a-zA-Z0-9+/]+=*)/.exec(wwwAuth);
+    if (!type2Match) {
+      throw new RPCProxyClientException('No NTLM challenge in 401 response');
+    }
+    const type2Data = Buffer.from(type2Match[1]!, 'base64');
+
+    // Extract server hostname from NTLMSSP challenge for remoteName
+    if (!this.remoteName) {
+      try {
+        const challenge = new NTLMAuthChallenge(type2Data);
+        const tiRaw = challenge.get('TargetInfoFields') as Buffer;
+        if (tiRaw && tiRaw.length > 0) {
+          const avPairs = new AV_PAIRS(tiRaw);
+          const hostnameEntry = avPairs.fields.get(NTLMSSP_AV_HOSTNAME);
+          if (hostnameEntry) {
+            this.remoteName = hostnameEntry[1].toString('utf16le');
+            if (this._stringbinding) {
+              this._stringbinding.setNetworkAddress(this.remoteName);
+            }
+            url.query = `${this.remoteName}:${this.dstport}`;
+          }
+        }
+      } catch { /* ignore */ }
+    }
+
+    // Step 2: Build Type3 (Authenticate) and send on same connection
+    const [type3] = getNTLMSSPType3(
+      type1, type2Data,
+      this._ntlmUsername, this._ntlmPassword, this._ntlmDomain,
+      this._ntlmLmhash, this._ntlmNthash, true,
+    );
+    const type3Data = type3.getData();
+
+    // Read and drain any remaining body from the 401 response
+    const contentLenStr = resp1.headers['content-length'];
+    if (contentLenStr) {
+      const bodyLen = parseInt(contentLenStr, 10);
+      const headerEnd = resp1.raw.indexOf(Buffer.from('\r\n\r\n'));
+      const bodyReceived = resp1.raw.length - (headerEnd + 4);
+      let remaining = bodyLen - bodyReceived;
+      while (remaining > 0) {
+        const chunk = await socketRecv(socket, Math.min(remaining, RPCProxyClient.RECV_SIZE));
+        remaining -= chunk.length;
+      }
+    }
+
+    // Final authenticated request with the real channel headers
+    const finalPath = url.path + '?' + url.query;
+    const finalHeaders: Record<string, string> = {
+      ...headers,
+      'Host': url.netloc,
+      'Authorization': `NTLM ${type3Data.toString('base64')}`,
+    };
+
+    this.channels[method] = socket;
+    await socketSend(socket, this.buildHttpRequest(method, finalPath, finalHeaders));
     await this.read100Continue(method);
   }
 
@@ -690,7 +807,7 @@ export class RPCProxyClient extends HTTPClientSecurityProvider {
       let socket: net.Socket;
       if (scheme === 'https') {
         socket = tls.connect(
-          { host: host ?? netloc, port, rejectUnauthorized: false },
+          { host: host ?? netloc, port, rejectUnauthorized: false, ALPNProtocols: ['http/1.1'] },
           () => resolve(socket),
         );
       } else {
@@ -703,22 +820,6 @@ export class RPCProxyClient extends HTTPClientSecurityProvider {
     });
   }
 
-  private getAuthHeadersForChannel(
-    _headers: Record<string, string>,
-  ): Record<string, string> {
-    // Delegate to the base class auth header generation.
-    // For Basic auth, use getAuthHeadersBasic().
-    // For NTLM, the negotiation would be handled through sendNtlmType1().
-    // This is a simplified version; full NTLM negotiation over HTTP
-    // would require multiple round-trips.
-    try {
-      const [basicHeaders] = this.getAuthHeadersBasic();
-      return basicHeaders;
-    } catch {
-      // Not basic auth or missing credentials - return empty
-      return {};
-    }
-  }
 
   private async read100Continue(method: string): Promise<void> {
     const socket = this.channels[method];
